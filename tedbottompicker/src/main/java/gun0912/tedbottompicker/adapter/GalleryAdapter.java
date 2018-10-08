@@ -46,7 +46,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     @TedBottomPicker.Builder.MediaType int selectedMediaType;
 
     public GalleryAdapter(Context context,
-                          TedBottomPicker.Builder builder,
+                          TedBottomPicker builder,
                           @TedBottomPicker.Builder.MediaType int selectedMediaType) {
 
         this.context = context;

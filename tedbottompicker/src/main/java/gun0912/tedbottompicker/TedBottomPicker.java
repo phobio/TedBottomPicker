@@ -57,17 +57,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import gun0912.tedbottompicker.adapter.GalleryAdapter;
 import gun0912.tedbottompicker.util.MimeTypeUtil;
 import gun0912.tedbottompicker.util.RealPathUtil;
 
+//@SuppressWarnings({"WeakerAccess", "unused"})
 public class TedBottomPicker extends BottomSheetDialogFragment {
 
     public static final String TAG = "TedBottomPicker";
     static final String EXTRA_CAMERA_IMAGE_URI = "camera_image_uri";
     static final String EXTRA_CAMERA_SELECTED_IMAGE_URI = "camera_selected_image_uri";
-    public static Builder builder;
     private static @Builder.MediaType int selectedMediaType;
     GalleryAdapter imageGalleryAdapter;
     View view_title_container;
@@ -76,6 +77,42 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
     Button btn_video;
     Button btn_photo;
 
+    private int previewMaxCount = 25;
+    private Drawable cameraTileDrawable;
+    private Drawable videoCameraTileDrawable;
+    private Drawable galleryTileDrawable;
+
+    private Drawable deSelectIconDrawable;
+    private Drawable selectedForegroundDrawable;
+
+    private int spacing = 1;
+    private boolean includeEdgeSpacing = false;
+    private OnImageSelectedListener onImageSelectedListener;
+    private OnMultiImageSelectedListener onMultiImageSelectedListener;
+    private OnErrorListener onErrorListener;
+    private ImageProvider imageProvider;
+    private boolean showCamera = true;
+    private boolean showGallery = true;
+    private int peekHeight = -1;
+    private int cameraTileBackgroundResId = R.color.tedbottompicker_camera;
+    private int galleryTileBackgroundResId = R.color.tedbottompicker_gallery;
+
+    private String title;
+    private boolean showTitle = true;
+    private int titleBackgroundResId;
+
+    private int selectMaxCount = Integer.MAX_VALUE;
+    private int selectMinCount = 0;
+
+
+    private String completeButtonText;
+    private String emptySelectionText;
+    private String selectMaxCountErrorText;
+    private String selectMinCountErrorText;
+    private @Builder.MediaType
+    int[] mediaTypes;
+    ArrayList<Uri> selectedUriList;
+    Uri selectedUri;
 
     FrameLayout selected_photos_container_frame;
     HorizontalScrollView hsv_selected_photos;
@@ -84,12 +121,11 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
     TextView selected_photos_empty;
     View contentView;
-    ArrayList<Uri> selectedUriList;
     ArrayList<Uri> tempUriList;
     private Uri cameraImageUri;
     private RecyclerView rc_gallery;
-    private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = new BottomSheetBehavior.BottomSheetCallback() {
 
+    private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = new BottomSheetBehavior.BottomSheetCallback() {
 
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -106,7 +142,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
             Log.d(TAG, "onSlide() slideOffset: " + slideOffset);
         }
     };
-    
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,8 +156,8 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
 
         if (savedInstanceState == null) {
-            cameraImageUri = builder.selectedUri;
-            tempUriList = builder.selectedUriList;
+            cameraImageUri = selectedUri;
+            tempUriList = selectedUriList;
         } else {
             cameraImageUri = savedInstanceState.getParcelable(EXTRA_CAMERA_IMAGE_URI);
             tempUriList = savedInstanceState.getParcelableArrayList(EXTRA_CAMERA_SELECTED_IMAGE_URI);
@@ -132,7 +168,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putParcelable(EXTRA_CAMERA_IMAGE_URI, cameraImageUri);
         outState.putParcelableArrayList(EXTRA_CAMERA_SELECTED_IMAGE_URI, selectedUriList);
         super.onSaveInstanceState(outState);
@@ -146,13 +182,14 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         ft.commitAllowingStateLoss();
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return super.onCreateDialog(savedInstanceState);
     }
 
     @Override
-    public void onViewCreated(View contentView, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View contentView, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(contentView, savedInstanceState);
 
 
@@ -166,10 +203,10 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         CoordinatorLayout.LayoutParams layoutParams =
                 (CoordinatorLayout.LayoutParams) ((View) contentView.getParent()).getLayoutParams();
         CoordinatorLayout.Behavior behavior = layoutParams.getBehavior();
-        if (behavior != null && behavior instanceof BottomSheetBehavior) {
+        if (behavior instanceof BottomSheetBehavior) {
             ((BottomSheetBehavior) behavior).setBottomSheetCallback(mBottomSheetBehaviorCallback);
-            if (builder != null && builder.peekHeight > 0) {
-                ((BottomSheetBehavior) behavior).setPeekHeight(builder.peekHeight);
+            if (peekHeight > 0) {
+                ((BottomSheetBehavior) behavior).setPeekHeight(peekHeight);
             }
 
         }
@@ -184,9 +221,9 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         selectedUriList = new ArrayList<>();
 
 
-        if (builder.onImageSelectedListener != null && cameraImageUri != null) {
+        if (onImageSelectedListener != null && cameraImageUri != null) {
             addUri(cameraImageUri);
-        } else if (builder.onMultiImageSelectedListener != null && tempUriList != null) {
+        } else if (onMultiImageSelectedListener != null && tempUriList != null) {
             for (Uri uri : tempUriList) {
                 addUri(uri);
             }
@@ -198,8 +235,8 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
     private void setSelectionView() {
 
-        if (builder.emptySelectionText != null) {
-            selected_photos_empty.setText(builder.emptySelectionText);
+        if (emptySelectionText != null) {
+            selected_photos_empty.setText(emptySelectionText);
         }
 
 
@@ -207,8 +244,8 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
     private void setDoneButton() {
 
-        if (builder.completeButtonText != null) {
-            btn_done.setText(builder.completeButtonText);
+        if (completeButtonText != null) {
+            btn_done.setText(completeButtonText);
         }
 
         btn_done.setOnClickListener(new View.OnClickListener() {
@@ -224,12 +261,12 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
     private void onMultiSelectComplete() {
 
-        if (selectedUriList.size() < builder.selectMinCount) {
+        if (selectedUriList.size() < selectMinCount) {
             String message;
-            if (builder.selectMinCountErrorText != null) {
-                message = builder.selectMinCountErrorText;
+            if (selectMinCountErrorText != null) {
+                message = selectMinCountErrorText;
             } else {
-                message = String.format(getResources().getString(R.string.select_min_count), builder.selectMinCount);
+                message = String.format(getResources().getString(R.string.select_min_count), selectMinCount);
             }
 
             Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
@@ -237,7 +274,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         }
 
 
-        builder.onMultiImageSelectedListener.onImagesSelected(selectedUriList);
+        onMultiImageSelectedListener.onImagesSelected(selectedUriList);
         dismissAllowingStateLoss();
     }
 
@@ -250,8 +287,8 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
     }
 
     private void initMediaToggle() {
-        if (builder.mediaTypes != null  && builder.mediaTypes.length > 1) {
-           view_title_container.setVisibility(View.VISIBLE);
+        if (mediaTypes != null  && mediaTypes.length > 1) {
+            view_title_container.setVisibility(View.VISIBLE);
             View.OnClickListener clickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -267,45 +304,43 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
                 }
             };
             btn_photo.setSelected(true);
-            btn_photo.setTag(builder.mediaTypes[0]);
+            btn_photo.setTag(mediaTypes[0]);
             btn_photo.setOnClickListener(clickListener);
-            btn_video.setTag(builder.mediaTypes[1]);
+            btn_video.setTag(mediaTypes[1]);
             btn_video.setOnClickListener(clickListener);
         } else {
             view_title_container.setVisibility(View.GONE);
         }
-        selectedMediaType = builder.mediaTypes[0];
+        selectedMediaType = mediaTypes[0];
     }
 
     private void initView(View contentView) {
 
         view_title_container = contentView.findViewById(R.id.view_title_container);
-        rc_gallery = (RecyclerView) contentView.findViewById(R.id.rc_gallery);
-        tv_title = (TextView) contentView.findViewById(R.id.tv_title);
-        btn_done = (Button) contentView.findViewById(R.id.btn_done);
-        btn_photo = (Button) contentView.findViewById(R.id.btn_photo);
-        btn_video = (Button) contentView.findViewById(R.id.btn_video);
+        rc_gallery = contentView.findViewById(R.id.rc_gallery);
+        tv_title = contentView.findViewById(R.id.tv_title);
+        btn_done = contentView.findViewById(R.id.btn_done);
+        btn_photo = contentView.findViewById(R.id.btn_photo);
+        btn_video = contentView.findViewById(R.id.btn_video);
 
         select_media_type_container = contentView.findViewById(R.id.view_media_type_container);
-        selected_photos_container_frame = (FrameLayout) contentView.findViewById(R.id.selected_photos_container_frame);
-        hsv_selected_photos = (HorizontalScrollView) contentView.findViewById(R.id.hsv_selected_photos);
-        selected_photos_container = (LinearLayout) contentView.findViewById(R.id.selected_photos_container);
-        selected_photos_empty = (TextView) contentView.findViewById(R.id.selected_photos_empty);
+        selected_photos_container_frame = contentView.findViewById(R.id.selected_photos_container_frame);
+        hsv_selected_photos = contentView.findViewById(R.id.hsv_selected_photos);
+        selected_photos_container = contentView.findViewById(R.id.selected_photos_container);
+        selected_photos_empty = contentView.findViewById(R.id.selected_photos_empty);
     }
 
     private void setRecyclerView() {
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 3);
         rc_gallery.setLayoutManager(gridLayoutManager);
-        rc_gallery.addItemDecoration(new GridSpacingItemDecoration(gridLayoutManager.getSpanCount(), builder.spacing, builder.includeEdgeSpacing));
+        rc_gallery.addItemDecoration(new GridSpacingItemDecoration(gridLayoutManager.getSpanCount(), spacing, includeEdgeSpacing));
         updateAdapter();
     }
 
     private void updateAdapter() {
 
-        imageGalleryAdapter = new GalleryAdapter(
-                getActivity()
-                , builder, selectedMediaType);
+        imageGalleryAdapter = new GalleryAdapter(getActivity(), this, selectedMediaType);
         rc_gallery.setAdapter(imageGalleryAdapter);
         imageGalleryAdapter.setOnItemClickListener(new GalleryAdapter.OnItemClickListener() {
             @Override
@@ -321,7 +356,9 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
                         startGalleryIntent();
                         break;
                     case GalleryAdapter.PickerTile.IMAGE:
-                        complete(pickerTile.getImageUri());
+                        if (pickerTile.getImageUri() != null) {
+                            complete(pickerTile.getImageUri());
+                        }
 
                         break;
 
@@ -347,33 +384,31 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
 
         } else {
-            builder.onImageSelectedListener.onImageSelected(uri);
+            onImageSelectedListener.onImageSelected(uri);
             dismissAllowingStateLoss();
         }
 
     }
 
-    private boolean addUri(final Uri uri) {
-
-
-        if (selectedUriList.size() == builder.selectMaxCount) {
+    private void addUri(final Uri uri) {
+        Objects.requireNonNull(getActivity());
+        if (selectedUriList.size() == selectMaxCount) {
             String message;
-            if (builder.selectMaxCountErrorText != null) {
-                message = builder.selectMaxCountErrorText;
+            if (selectMaxCountErrorText != null) {
+                message = selectMaxCountErrorText;
             } else {
-                message = String.format(getResources().getString(R.string.select_max_count), builder.selectMaxCount);
+                message = String.format(getResources().getString(R.string.select_max_count), selectMaxCount);
             }
 
             Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-            return false;
+            return;
         }
-
 
         selectedUriList.add(uri);
 
         final View rootView = LayoutInflater.from(getActivity()).inflate(R.layout.tedbottompicker_selected_item, null);
-        ImageView thumbnail = (ImageView) rootView.findViewById(R.id.selected_photo);
-        ImageView iv_close = (ImageView) rootView.findViewById(R.id.iv_close);
+        ImageView thumbnail = rootView.findViewById(R.id.selected_photo);
+        ImageView iv_close = rootView.findViewById(R.id.iv_close);
         rootView.setTag(uri);
 
         selected_photos_container.addView(rootView, 0);
@@ -382,7 +417,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         int px = (int) getResources().getDimension(R.dimen.tedbottompicker_selected_image_height);
         thumbnail.setLayoutParams(new FrameLayout.LayoutParams(px, px));
 
-        if (builder.imageProvider == null) {
+        if (imageProvider == null) {
             Glide.with(getActivity())
                     .load(uri)
                     .thumbnail(0.1f)
@@ -392,12 +427,12 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
                             .error(R.drawable.img_error))
                     .into(thumbnail);
         } else {
-            builder.imageProvider.onProvideImage(thumbnail, uri);
+            imageProvider.onProvideImage(thumbnail, uri);
         }
 
 
-        if (builder.deSelectIconDrawable != null) {
-            iv_close.setImageDrawable(builder.deSelectIconDrawable);
+        if (deSelectIconDrawable != null) {
+            iv_close.setImageDrawable(deSelectIconDrawable);
         }
 
         iv_close.setOnClickListener(new View.OnClickListener() {
@@ -411,7 +446,6 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
         updateSelectedView();
         imageGalleryAdapter.setSelectedUriList(selectedUriList, uri);
-        return true;
 
     }
 
@@ -447,6 +481,8 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
     }
 
     private void startCameraIntent() {
+        Objects.requireNonNull(getActivity());
+        Objects.requireNonNull(getContext());
         Intent cameraInent;
         File mediaFile;
 
@@ -548,16 +584,16 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
     private void errorMessage(String message) {
         String errorMessage = message == null ? "Something wrong." : message;
 
-        if (builder.onErrorListener == null) {
+        if (onErrorListener == null) {
             Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_SHORT).show();
         } else {
-            builder.onErrorListener.onError(errorMessage);
+            onErrorListener.onError(errorMessage);
         }
     }
 
     private void startGalleryIntent() {
+        Objects.requireNonNull(getActivity());
         Intent galleryIntent;
-        Uri uri;
         if (selectedMediaType == Builder.MediaType.IMAGE) {
             galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             galleryIntent.setType("image/*");
@@ -591,7 +627,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
     private void setTitle() {
 
-        if (!builder.showTitle) {
+        if (!showTitle) {
             tv_title.setVisibility(View.GONE);
 
             if (!isMultiSelect()) {
@@ -601,18 +637,18 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
             return;
         }
 
-        if (!TextUtils.isEmpty(builder.title)) {
-            tv_title.setText(builder.title);
+        if (!TextUtils.isEmpty(title)) {
+            tv_title.setText(title);
         }
 
-        if (builder.titleBackgroundResId > 0) {
-            tv_title.setBackgroundResource(builder.titleBackgroundResId);
+        if (titleBackgroundResId > 0) {
+            tv_title.setBackgroundResource(titleBackgroundResId);
         }
 
     }
 
     private boolean isMultiSelect() {
-        return builder.onMultiImageSelectedListener != null;
+        return onMultiImageSelectedListener != null;
     }
 
 
@@ -627,6 +663,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
             @Override
             public void onScanCompleted(String s, Uri uri) {
+                if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -679,40 +716,40 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
     public static class Builder {
 
-        public Context context;
-        public int previewMaxCount = 25;
-        public Drawable cameraTileDrawable;
-        public Drawable videoCameraTileDrawable;
-        public Drawable galleryTileDrawable;
+        private Context context;
+        private int previewMaxCount = 25;
+        private Drawable cameraTileDrawable;
+        private Drawable videoCameraTileDrawable;
+        private Drawable galleryTileDrawable;
 
-        public Drawable deSelectIconDrawable;
-        public Drawable selectedForegroundDrawable;
+        private Drawable deSelectIconDrawable;
+        private Drawable selectedForegroundDrawable;
 
-        public int spacing = 1;
-        public boolean includeEdgeSpacing = false;
-        public OnImageSelectedListener onImageSelectedListener;
-        public OnMultiImageSelectedListener onMultiImageSelectedListener;
-        public OnErrorListener onErrorListener;
-        public ImageProvider imageProvider;
-        public boolean showCamera = true;
-        public boolean showGallery = true;
-        public int peekHeight = -1;
-        public int cameraTileBackgroundResId = R.color.tedbottompicker_camera;
-        public int galleryTileBackgroundResId = R.color.tedbottompicker_gallery;
+        private int spacing = 1;
+        private boolean includeEdgeSpacing = false;
+        private OnImageSelectedListener onImageSelectedListener;
+        private OnMultiImageSelectedListener onMultiImageSelectedListener;
+        private OnErrorListener onErrorListener;
+        private ImageProvider imageProvider;
+        private boolean showCamera = true;
+        private boolean showGallery = true;
+        private int peekHeight = -1;
+        private int cameraTileBackgroundResId = R.color.tedbottompicker_camera;
+        private int galleryTileBackgroundResId = R.color.tedbottompicker_gallery;
 
-        public String title;
-        public boolean showTitle = true;
-        public int titleBackgroundResId;
+        private String title;
+        private boolean showTitle = true;
+        private int titleBackgroundResId;
 
-        public int selectMaxCount = Integer.MAX_VALUE;
-        public int selectMinCount = 0;
+        private int selectMaxCount = Integer.MAX_VALUE;
+        private int selectMinCount = 0;
 
 
-        public String completeButtonText;
-        public String emptySelectionText;
-        public String selectMaxCountErrorText;
-        public String selectMinCountErrorText;
-        public @MediaType int[] mediaTypes;
+        private String completeButtonText;
+        private String emptySelectionText;
+        private String selectMaxCountErrorText;
+        private String selectMinCountErrorText;
+        private @MediaType int[] mediaTypes;
         ArrayList<Uri> selectedUriList;
         Uri selectedUri;
 
@@ -948,10 +985,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
                 throw new RuntimeException("You have to use setOnImageSelectedListener() or setOnMultiImageSelectedListener() for receive selected Uri");
             }
 
-            TedBottomPicker customBottomSheetDialogFragment = new TedBottomPicker();
-
-            customBottomSheetDialogFragment.builder = this;
-            return customBottomSheetDialogFragment;
+            return new TedBottomPicker();
         }
 
         @Retention(RetentionPolicy.SOURCE)
