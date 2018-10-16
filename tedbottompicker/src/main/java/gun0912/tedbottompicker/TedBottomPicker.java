@@ -985,7 +985,11 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
                 throw new RuntimeException("You have to use setOnImageSelectedListener() or setOnMultiImageSelectedListener() for receive selected Uri");
             }
 
-            return new TedBottomPicker();
+            TedBottomPicker fragment = new TedBottomPicker();
+            Bundle bundle = new Bundle();
+            bundle.put
+            fragment.setArguments(bundle);
+            return fragment;
         }
 
         @Retention(RetentionPolicy.SOURCE)

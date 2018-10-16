@@ -45,12 +45,12 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     ArrayList<Uri> selectedUriList;
     @TedBottomPicker.Builder.MediaType int selectedMediaType;
 
-    public GalleryAdapter(Context context,
-                          TedBottomPicker builder,
-                          @TedBottomPicker.Builder.MediaType int selectedMediaType) {
+    public GalleryAdapter(
+            @NonNull Context context,
+            @NonNull TedBottomPicker builder,
+            @TedBottomPicker.Builder.MediaType int selectedMediaType) {
 
         this.context = context;
-        this.builder = builder;
 
         pickerTiles = new ArrayList<>();
         selectedUriList = new ArrayList<>();
@@ -77,9 +77,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
                 columns = new String[]{MediaStore.Video.VideoColumns.DATA};
                 orderBy = MediaStore.Video.VideoColumns.DATE_ADDED + " DESC";
             }
-
-
-
 
             cursor = context.getApplicationContext().getContentResolver().query(uri, columns, null, null, orderBy);
             //imageCursor = sContext.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
