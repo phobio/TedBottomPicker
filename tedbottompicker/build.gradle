@@ -47,4 +47,3 @@ dependencies {
     implementation 'gun0912.ted:tedonactivityresult:1.0.6'
 }
 
-//apply from: rootProject.file('publish.gradle')
