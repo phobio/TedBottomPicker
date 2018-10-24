@@ -31,7 +31,3 @@ allprojects {
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
