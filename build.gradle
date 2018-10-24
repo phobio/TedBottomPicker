@@ -2,18 +2,23 @@
 
 buildscript {
     repositories {
+        mavenCentral()
         jcenter()
         google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
     }
 }
 
 allprojects {
     repositories {
+        mavenCentral()
+        maven {
+            url "https://maven.google.com"
+        }
         jcenter()
         google()
     }
@@ -21,6 +26,9 @@ allprojects {
     group = GROUP
     version = VERSION_NAME
 }
+
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 
 task clean(type: Delete) {
     delete rootProject.buildDir
