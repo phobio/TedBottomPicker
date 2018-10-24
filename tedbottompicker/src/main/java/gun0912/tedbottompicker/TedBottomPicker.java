@@ -45,8 +45,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.gun0912.tedonactivityresult.TedOnActivityResult;
-import com.gun0912.tedonactivityresult.listener.OnActivityResultListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,6 +88,9 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
     private static final String EXTRA_GALLERY_TILE_RES_ID = "gallery_tile_res_id";
     private static final String EXTRA_CAMERA_TILE_BG = "camera_tile_background_res_id";
     private static final String EXTRA_GALLERY_TILE_BG = "gallery_tile_background_res_id";
+
+    private static final int RC_CAMERA = 1;
+    private static final int RC_GALLERY = 2;
 
     private GalleryAdapter imageGalleryAdapter;
     private View view_title_container;
@@ -538,17 +539,24 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 
         cameraInent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
-        TedOnActivityResult.with(getActivity())
-                .setIntent(cameraInent)
-                .setListener(new OnActivityResultListener() {
-                    @Override
-                    public void onActivityResult(int resultCode, Intent data) {
-                        if (resultCode == Activity.RESULT_OK) {
-                            onActivityResultCamera(cameraImageUri);
-                        }
-                    }
-                })
-                .startActivityForResult();
+        startActivityForResult(cameraInent, RC_CAMERA);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case RC_CAMERA: {
+                if (resultCode == Activity.RESULT_OK) {
+                    onActivityResultCamera(cameraImageUri);
+                }
+                break;
+            }
+            case RC_GALLERY: {
+                if (resultCode == Activity.RESULT_OK) {
+                    onActivityResultGallery(data);
+                }
+            }
+        }
     }
 
     @Nullable
@@ -648,17 +656,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
             return;
         }
 
-        TedOnActivityResult.with(getActivity())
-                .setIntent(galleryIntent)
-                .setListener(new OnActivityResultListener() {
-                    @Override
-                    public void onActivityResult(int resultCode, Intent data) {
-                        if (resultCode == Activity.RESULT_OK) {
-                            onActivityResultGallery(data);
-                        }
-                    }
-                })
-                .startActivityForResult();
+        startActivityForResult(galleryIntent, RC_GALLERY);
     }
 
     private void errorMessage() {
