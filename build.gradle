@@ -2,9 +2,11 @@
 
 buildscript {
     repositories {
-        mavenCentral()
-        jcenter()
         google()
+        maven {
+            url 'https://dl.google.com/dl/android/maven2'
+        }
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
@@ -15,12 +17,11 @@ buildscript {
 
 allprojects {
     repositories {
-        mavenCentral()
+        google()
         maven {
             url 'https://dl.google.com/dl/android/maven2'
         }
         jcenter()
-        google()
     }
 
     group = GROUP
