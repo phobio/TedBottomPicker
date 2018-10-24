@@ -3,6 +3,8 @@ apply plugin: 'com.android.library'
 
 android {
 
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
 
@@ -21,8 +23,7 @@ android {
         abortOnError false
     }
 
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+
 }
 
 
