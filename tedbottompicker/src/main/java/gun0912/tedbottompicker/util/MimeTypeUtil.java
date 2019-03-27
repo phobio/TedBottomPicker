@@ -3,11 +3,12 @@ package gun0912.tedbottompicker.util;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.StringDef;
 import android.webkit.MimeTypeMap;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import androidx.annotation.StringDef;
 
 public class MimeTypeUtil {
 

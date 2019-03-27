@@ -41,12 +41,16 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    api 'com.android.support:design:28.0.0'
-    implementation 'com.android.support:support-annotations:28.0.0'
-    javadocDeps 'com.android.support:support-annotations:28.0.0'
-    implementation 'com.github.bumptech.glide:glide:4.7.1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
+
+    def supportLib = "1.0.0"
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    api "com.google.android.material:material:$supportLib"
+    implementation "androidx.annotation:annotation:$supportLib"
+    implementation "androidx.fragment:fragment:$supportLib"
+    javadocDeps "ndroidx.annotation:annotation:$supportLib"
+
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     implementation 'gun0912.ted:tedonactivityresult:1.0.6'
 }
 

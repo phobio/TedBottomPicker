@@ -15,23 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.ColorRes;
-import android.support.annotation.DimenRes;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.BottomSheetDialogFragment;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,6 +28,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +42,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import androidx.annotation.ColorRes;
+import androidx.annotation.DimenRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import gun0912.tedbottompicker.adapter.GalleryAdapter;
 import gun0912.tedbottompicker.util.MimeTypeUtil;
 import gun0912.tedbottompicker.util.RealPathUtil;
@@ -247,6 +247,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         super.onViewCreated(contentView, savedInstanceState);
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public void setupDialog(Dialog dialog, int style) {
         super.setupDialog(dialog, style);
@@ -721,16 +722,16 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
             errorMessage();
         }
 
-        String realPath = RealPathUtil.getRealPath(getActivity(), temp);
+//        String realPath = RealPathUtil.getRealPath(getActivity(), temp);
+//
+//        Uri selectedImageUri;
+//        try {
+//            selectedImageUri = Uri.fromFile(new File(realPath));
+//        } catch (Exception ex) {
+//            selectedImageUri = Uri.parse(realPath);
+//        }
 
-        Uri selectedImageUri;
-        try {
-            selectedImageUri = Uri.fromFile(new File(realPath));
-        } catch (Exception ex) {
-            selectedImageUri = Uri.parse(realPath);
-        }
-
-        complete(selectedImageUri);
+        complete(temp);
     }
 
 
