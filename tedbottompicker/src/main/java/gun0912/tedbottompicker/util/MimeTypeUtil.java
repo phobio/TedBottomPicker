@@ -7,6 +7,7 @@ import android.webkit.MimeTypeMap;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 import androidx.annotation.StringDef;
 
@@ -19,9 +20,9 @@ public class MimeTypeUtil {
         String VIDEO = "video/mp4";
         String WILDCARD = "*/*";
     }
-    public static  String getMimeType(Context context, Uri uri) {
-        String mimeType = null;
-        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+    public static String getMimeType(Context context, Uri uri) {
+        String mimeType;
+        if (Objects.equals(uri.getScheme(), ContentResolver.SCHEME_CONTENT)) {
             ContentResolver cr = context.getContentResolver();
             mimeType = cr.getType(uri);
         } else {
