@@ -9,6 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
 public class MimeTypeUtil {
@@ -20,6 +21,8 @@ public class MimeTypeUtil {
         String VIDEO = "video/mp4";
         String WILDCARD = "*/*";
     }
+
+    @Nullable
     public static String getMimeType(Context context, Uri uri) {
         String mimeType;
         if (Objects.equals(uri.getScheme(), ContentResolver.SCHEME_CONTENT)) {
