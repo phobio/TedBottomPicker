@@ -23,11 +23,10 @@ public class MimeTypeUtil {
     }
 
     @Nullable
-    public static String getMimeType(Context context, Uri uri) {
+    public static String getMimeType(ContentResolver resolver, Uri uri) {
         String mimeType;
         if (Objects.equals(uri.getScheme(), ContentResolver.SCHEME_CONTENT)) {
-            ContentResolver cr = context.getContentResolver();
-            mimeType = cr.getType(uri);
+            mimeType = resolver.getType(uri);
         } else {
             String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
                     .toString());
@@ -35,6 +34,11 @@ public class MimeTypeUtil {
                     fileExtension.toLowerCase());
         }
         return mimeType;
+    }
+
+    @Nullable
+    public static String getMimeType(Context context, Uri uri) {
+        return getMimeType(context.getContentResolver(), uri);
     }
 
 
