@@ -58,6 +58,16 @@
             android:background="@null"
             android:textAllCaps="false"
             android:textColor="@drawable/selector_btn_text_color"/>
+
+        <Button
+            android:id="@+id/btn_pdf"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="PDFs"
+            android:textSize="16sp"
+            android:background="@null"
+            android:textAllCaps="false"
+            android:textColor="@drawable/selector_btn_text_color"/>
     </LinearLayout>
 
     <!--

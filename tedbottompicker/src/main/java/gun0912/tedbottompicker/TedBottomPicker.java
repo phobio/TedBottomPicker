@@ -98,6 +98,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
     private Button btn_done;
     private Button btn_video;
     private Button btn_photo;
+    private Button btn_pdf;
     private FrameLayout selected_photos_container_frame;
     private LinearLayout selected_photos_container;
     private TextView selected_photos_empty;
@@ -333,8 +334,10 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
                 @Override
                 public void onClick(View v) {
                     btn_photo.setSelected(false);
+                    btn_pdf.setSelected(false);
                     btn_video.setSelected(false);
                     btn_photo.setTypeface(Typeface.DEFAULT);
+                    btn_pdf.setTypeface(Typeface.DEFAULT);
                     btn_video.setTypeface(Typeface.DEFAULT);
 
                     v.setSelected(true);
@@ -348,6 +351,10 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
             btn_photo.setOnClickListener(clickListener);
             btn_video.setTag(mediaTypes[1]);
             btn_video.setOnClickListener(clickListener);
+            btn_pdf.setTag(mediaTypes[2]);
+            btn_pdf.setOnClickListener(v -> {
+                startPdfPicker();
+            });
         } else {
             view_title_container.setVisibility(View.GONE);
         }
@@ -361,6 +368,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         btn_done = contentView.findViewById(R.id.btn_done);
         btn_photo = contentView.findViewById(R.id.btn_photo);
         btn_video = contentView.findViewById(R.id.btn_video);
+        btn_pdf = contentView.findViewById(R.id.btn_pdf);
 
 //        View select_media_type_container = contentView.findViewById(R.id.view_media_type_container);
         selected_photos_container_frame = contentView.findViewById(R.id.selected_photos_container_frame);
@@ -639,6 +647,15 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
 //        }
     }
 
+    private void startPdfPicker() {
+        Objects.requireNonNull(getActivity());
+        Intent galleryIntent;
+        galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        galleryIntent.setType("application/pdf");
+        startActivityForResult(Intent.createChooser(galleryIntent, "Pick PDF"), RC_GALLERY);
+    }
+
     private void startGalleryIntent() {
         Objects.requireNonNull(getActivity());
         Intent galleryIntent;
@@ -680,7 +697,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
             tv_title.setText(title);
         }
 
-        if (titleBackgroundResId > 0) {
+        if (titleBackgroundResId != 0) {
             tv_title.setBackgroundResource(titleBackgroundResId);
         }
     }
@@ -888,6 +905,7 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
         public @interface MediaType {
             int IMAGE = 1;
             int VIDEO = 2;
+            int PDF = 3;
         }
 
     }
