@@ -59,7 +59,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onPermissionGranted() {
 
-                        @MediaType int[] mediaTypes = {MediaType.IMAGE, MediaType.VIDEO};
+                        @MediaType int[] mediaTypes = {
+                                MediaType.IMAGE,
+                                MediaType.VIDEO,
+                                MediaType.PDF
+                        };
                         TedBottomPicker bottomSheetDialogFragment = new TedBottomPicker.Builder(MainActivity.this)
                                 .setOnImageSelectedListener(new TedBottomPicker.OnImageSelectedListener() {
                                     @Override

@@ -328,23 +328,20 @@ public class TedBottomPicker extends BottomSheetDialogFragment {
     }
 
     private void initMediaToggle() {
-        if (mediaTypes != null  && mediaTypes.length > 1) {
+        if (mediaTypes != null  && mediaTypes.length > 2) {
             view_title_container.setVisibility(View.VISIBLE);
-            View.OnClickListener clickListener = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    btn_photo.setSelected(false);
-                    btn_pdf.setSelected(false);
-                    btn_video.setSelected(false);
-                    btn_photo.setTypeface(Typeface.DEFAULT);
-                    btn_pdf.setTypeface(Typeface.DEFAULT);
-                    btn_video.setTypeface(Typeface.DEFAULT);
+            View.OnClickListener clickListener = v -> {
+                btn_photo.setSelected(false);
+                btn_pdf.setSelected(false);
+                btn_video.setSelected(false);
+                btn_photo.setTypeface(Typeface.DEFAULT);
+                btn_pdf.setTypeface(Typeface.DEFAULT);
+                btn_video.setTypeface(Typeface.DEFAULT);
 
-                    v.setSelected(true);
-                    ((Button)v).setTypeface(Typeface.DEFAULT_BOLD);
-                    selectedMediaType = (int) v.getTag();
-                    updateAdapter();
-                }
+                v.setSelected(true);
+                ((Button)v).setTypeface(Typeface.DEFAULT_BOLD);
+                selectedMediaType = (int) v.getTag();
+                updateAdapter();
             };
             btn_photo.setSelected(true);
             btn_photo.setTag(mediaTypes[0]);
